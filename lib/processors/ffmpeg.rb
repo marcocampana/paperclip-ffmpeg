@@ -42,19 +42,6 @@ module Paperclip
       src = @file
       vf_convert_options = []
 
-      # encode the video with the right orientation
-      video_meta_data = MiniExiftool.new(@file.path)
-      rotation = video_meta_data.to_hash['Rotation']
-
-      transpose = case rotation
-        when 90  then '"transpose=1"'
-        when 180 then '"vflip"'
-        when 270 then '"transpose=2"'
-      end
-
-      # @convert_options[:output][:vf] = transpose if transpose
-      vf_convert_options << transpose if transpose
-
       dst = Tempfile.new([@basename, @format ? ".#{@format}" : ''])
       dst.binmode
 
@@ -121,6 +108,19 @@ module Paperclip
         @convert_options[:output][:vframes] = 1
         @convert_options[:output][:f] = 'image2'
       end
+
+      # encode the video with the right orientation
+      video_meta_data = MiniExiftool.new(@file.path)
+      rotation = video_meta_data.to_hash['Rotation']
+
+      transpose = case rotation
+        when 90  then '"transpose=1"'
+        when 180 then '"vflip"'
+        when 270 then '"transpose=2"'
+      end
+
+      # @convert_options[:output][:vf] = transpose if transpose
+      vf_convert_options << transpose if transpose
 
       vf_convert_options << @convert_options[:output][:vf]
       @convert_options[:output][:vf] = vf_convert_options.compact.join(',')
