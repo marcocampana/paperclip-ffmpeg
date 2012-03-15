@@ -21,7 +21,7 @@ module Paperclip
           @convert_options[:output].reverse_merge! options[:convert_options][:output]
         end
       end
-      
+
       @geometry        = options[:geometry]
       @file            = file
       @keep_aspect     = !@geometry.nil? && @geometry[-1,1] != '!'
@@ -55,7 +55,7 @@ module Paperclip
 
       dst = Tempfile.new([@basename, @format ? ".#{@format}" : ''])
       dst.binmode
-      
+
       parameters = []
       # Add geometry
       if @geometry
@@ -119,7 +119,7 @@ module Paperclip
         @convert_options[:output][:vframes] = 1
         @convert_options[:output][:f] = 'image2'
       end
-      
+
       # Add source
       parameters << @convert_options[:input].map { |k,v| "-#{k.to_s} #{v} "}
       parameters << "-i :source"
@@ -127,7 +127,7 @@ module Paperclip
       parameters << ":dest"
 
       parameters = parameters.flatten.compact.join(" ").strip.squeeze(" ")
-      
+
       Paperclip.log("[ffmpeg] #{parameters}")
       begin
         success = Paperclip.run("ffmpeg", parameters, :source => "#{File.expand_path(src.path)}", :dest => File.expand_path(dst.path))
@@ -137,7 +137,7 @@ module Paperclip
 
       dst
     end
-    
+
     def identify
       meta = {}
       command = "ffmpeg -i #{File.expand_path(@file.path)} 2>&1"
@@ -163,7 +163,7 @@ module Paperclip
       meta
     end
   end
-  
+
   class Attachment
     def meta
       instance_read(:meta)
