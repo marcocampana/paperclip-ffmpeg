@@ -123,7 +123,7 @@ module Paperclip
       vf_convert_options << transpose if transpose
 
       vf_convert_options << @convert_options[:output][:vf]
-      @convert_options[:output][:vf] = vf_convert_options.compact.join(',')
+      @convert_options[:output][:vf] = vf_convert_options.compact.join(',') if vf_convert_options.any?
 
       # Add source
       parameters << @convert_options[:input].map { |k,v| "-#{k.to_s} #{v} "}
