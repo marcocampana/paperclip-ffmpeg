@@ -40,6 +40,19 @@ module Paperclip
     # that contains the new image/video.
     def make
       src = @file
+
+      # encode the video with the right orientation
+      video_meta_data = MiniExiftool.new(@file.path)
+      rotation = video_meta_data.to_hash['Rotation']
+
+      transpose = case rotation
+        when 90  then '"transpose=1"'
+        when 180 then '"vflip"'
+        when 270 then '"transpose=2"'
+      end
+
+      @convert_options[:output][:vf] = transpose if transpose
+
       dst = Tempfile.new([@basename, @format ? ".#{@format}" : ''])
       dst.binmode
       
