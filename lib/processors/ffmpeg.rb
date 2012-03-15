@@ -40,6 +40,7 @@ module Paperclip
     # that contains the new image/video.
     def make
       src = @file
+      vf_convert_options = []
 
       # encode the video with the right orientation
       video_meta_data = MiniExiftool.new(@file.path)
@@ -51,7 +52,8 @@ module Paperclip
         when 270 then '"transpose=2"'
       end
 
-      @convert_options[:output][:vf] = transpose if transpose
+      # @convert_options[:output][:vf] = transpose if transpose
+      vf_convert_options << transpose if transpose
 
       dst = Tempfile.new([@basename, @format ? ".#{@format}" : ''])
       dst.binmode
@@ -96,9 +98,9 @@ module Paperclip
               # We should add half the delta as a padding offset Y
               pad_y = (target_height.to_f - height.to_f) / 2
               if pad_y > 0
-                @convert_options[:output][:vf] = "scale=#{width}:-1,pad=#{width.to_i}:#{target_height.to_i}:0:#{pad_y}:black"
+                vf_convert_options << "scale=#{width}:-1,pad=#{width.to_i}:#{target_height.to_i}:0:#{pad_y}:black"
               else
-                @convert_options[:output][:vf] = "scale=#{width}:-1,crop=#{width.to_i}:#{height.to_i}"
+                vf_convert_options << "scale=#{width}:-1,crop=#{width.to_i}:#{height.to_i}"
               end
             else
               # Keep aspect ratio
@@ -119,6 +121,9 @@ module Paperclip
         @convert_options[:output][:vframes] = 1
         @convert_options[:output][:f] = 'image2'
       end
+
+      vf_convert_options << @convert_options[:output][:vf]
+      @convert_options[:output][:vf] = vf_convert_options.compact.join(',')
 
       # Add source
       parameters << @convert_options[:input].map { |k,v| "-#{k.to_s} #{v} "}
